@@ -4,29 +4,27 @@ from core.neuron import Neuron
 
 # class for neuron network
 class NN:
-    # constructor
-    def __init__(self):
-
-        # learn rate
-        learn_rate = 0.3
+    # constructor4
+    def __init__(self, learn_rate):
 
         # Creating neurons
 
         # layer 1
-        self.laeyr1_hidden1 = Neuron(learn_rate, np.random.random())
-        self.laeyr1_hidden2 = Neuron(learn_rate, np.random.random())
-        self.laeyr1_hidden3 = Neuron(learn_rate, np.random.random())
-        self.laeyr1_hidden4 = Neuron(learn_rate, np.random.random())
+        self.laeyr1_hidden1 = Neuron(learn_rate, np.random.random(), np.random.random(), np.random.random())
+        self.laeyr1_hidden2 = Neuron(learn_rate, np.random.random(), np.random.random(), np.random.random())
+        self.laeyr1_hidden3 = Neuron(learn_rate, np.random.random(), np.random.random(), np.random.random())
+        self.laeyr1_hidden4 = Neuron(learn_rate, np.random.random(), np.random.random(), np.random.random())
 
         # layer 2
-        self.laeyr2_hidden1 = Neuron(learn_rate, np.random.random(),np.random.random())
-        self.laeyr2_hidden2 = Neuron(learn_rate, np.random.random(),np.random.random(),np.random.random())
-        self.laeyr2_hidden3 = Neuron(learn_rate, np.random.random(),np.random.random(),np.random.random())
+        self.laeyr2_hidden1 = Neuron(learn_rate, np.random.random())
+        self.laeyr2_hidden2 = Neuron(learn_rate, np.random.random(),np.random.random())
+        self.laeyr2_hidden3 = Neuron(learn_rate, np.random.random(),np.random.random())
         self.laeyr2_hidden4 = Neuron(learn_rate, np.random.random(),np.random.random())
+        self.laeyr2_hidden5 = Neuron(learn_rate, np.random.random())
 
         # output
-        self.output1 = Neuron(learn_rate,np.random.random(),np.random.random())
-        self.output2 = Neuron(learn_rate,np.random.random(),np.random.random())
+        self.output1 = Neuron(learn_rate,np.random.random(),np.random.random(),np.random.random(),np.random.random())
+        self.output2 = Neuron(learn_rate,np.random.random(),np.random.random(),np.random.random(),np.random.random())
 
     # Method for prediction
     def Predict(self, data):
@@ -38,14 +36,15 @@ class NN:
         r_l1_h4 = self.laeyr1_hidden4.Predict(data)
 
         # layer 2
-        r_l2_h1 = self.laeyr2_hidden1.Predict(np.array([r_l1_h1,r_l1_h2]))
-        r_l2_h2 = self.laeyr2_hidden2.Predict(np.array([r_l1_h1,r_l1_h2,r_l1_h3]))
-        r_l2_h3 = self.laeyr2_hidden3.Predict(np.array([r_l1_h2,r_l1_h3,r_l1_h4]))
-        r_l2_h4 = self.laeyr2_hidden4.Predict(np.array([r_l1_h3,r_l1_h4]))
+        r_l2_h1 = self.laeyr2_hidden1.Predict(np.array([r_l1_h1]))
+        r_l2_h2 = self.laeyr2_hidden2.Activator(np.array([r_l1_h1,r_l1_h2]))
+        r_l2_h3 = self.laeyr2_hidden3.Predict(np.array([r_l1_h2,r_l1_h3]))
+        r_l2_h4 = self.laeyr2_hidden4.Activator(np.array([r_l1_h3,r_l1_h4]))
+        r_l2_h5 = self.laeyr2_hidden5.Predict(np.array([r_l1_h4]))
 
         # output
-        r_o1 = self.output1.Predict(np.array([r_l2_h1, r_l2_h2]))
-        r_o2 = self.output2.Predict(np.array([r_l2_h3, r_l2_h4]))
+        r_o1 = self.output1.Predict(np.array([r_l2_h1, r_l2_h2, r_l2_h3, r_l2_h5]))
+        r_o2 = self.output2.Predict(np.array([r_l2_h1, r_l2_h3, r_l2_h4, r_l2_h5]))
 
         # output
         return np.array([r_o1,r_o2])
@@ -62,21 +61,23 @@ class NN:
         self.output2.Calibrate_Weights(answer[1])
 
         # layer 2
-        self.laeyr2_hidden1.Back_Propagation_Calibrate_Weigth(self.output1.back_propagation_error_sizes[0])
+        self.laeyr2_hidden1.Back_Propagation_Calibrate_Weigth((self.output1.back_propagation_error_sizes[0] + self.output2.back_propagation_error_sizes[0]) / 2)
         self.laeyr2_hidden2.Back_Propagation_Calibrate_Weigth(self.output1.back_propagation_error_sizes[1])
-        self.laeyr2_hidden3.Back_Propagation_Calibrate_Weigth(self.output2.back_propagation_error_sizes[0])
-        self.laeyr2_hidden4.Back_Propagation_Calibrate_Weigth(self.output2.back_propagation_error_sizes[1])
+        self.laeyr2_hidden3.Back_Propagation_Calibrate_Weigth((self.output1.back_propagation_error_sizes[2] + self.output2.back_propagation_error_sizes[1]) / 2)
+        self.laeyr2_hidden4.Back_Propagation_Calibrate_Weigth(self.output2.back_propagation_error_sizes[2])
+        self.laeyr2_hidden5.Back_Propagation_Calibrate_Weigth((self.output1.back_propagation_error_sizes[3] + self.output2.back_propagation_error_sizes[3]) / 2)
 
         # layer 1
         self.laeyr1_hidden1.Back_Propagation_Calibrate_Weigth((self.laeyr2_hidden1.back_propagation_error_sizes[0] + self.laeyr2_hidden2.back_propagation_error_sizes[0]) / 2)
-        self.laeyr1_hidden2.Back_Propagation_Calibrate_Weigth((self.laeyr2_hidden1.back_propagation_error_sizes[1] + self.laeyr2_hidden2.back_propagation_error_sizes[1] + self.laeyr2_hidden3.back_propagation_error_sizes[0]) / 3)
-        self.laeyr1_hidden3.Back_Propagation_Calibrate_Weigth((self.laeyr2_hidden2.back_propagation_error_sizes[2] + self.laeyr2_hidden3.back_propagation_error_sizes[1] + self.laeyr2_hidden4.back_propagation_error_sizes[0]) / 3)
-        self.laeyr1_hidden4.Back_Propagation_Calibrate_Weigth((self.laeyr2_hidden3.back_propagation_error_sizes[2] + self.laeyr2_hidden4.back_propagation_error_sizes[1]) / 2)
+        self.laeyr1_hidden2.Back_Propagation_Calibrate_Weigth((self.laeyr2_hidden2.back_propagation_error_sizes[1] + self.laeyr2_hidden3.back_propagation_error_sizes[0]) / 2)
+        self.laeyr1_hidden3.Back_Propagation_Calibrate_Weigth((self.laeyr2_hidden3.back_propagation_error_sizes[1] + self.laeyr2_hidden4.back_propagation_error_sizes[0]) / 2)
 
         # show error size
-        print(epoch)
-        print("1 Error size %f" % ( np.mean((output_result[0] - answer[0]) ** 2)))
-        print("2 Error size %f" % ( np.mean((output_result[1] - answer[1]) ** 2)))
+        if epoch % 100 == 0:
+            print(epoch)
+            print("1 Error size %f" % ( np.mean((output_result[0] - answer[0]) ** 2)))
+            print("2 Error size %f" % ( np.mean((output_result[1] - answer[1]) ** 2)))
+
 
     # Method for Learn network
     def Learn(self, train_array, epoch = 5000):
@@ -86,8 +87,8 @@ class NN:
             for data in train_array:
 
                 # preprocess data
-                train_data = np.array([data[0]])
-                answer = np.array([data[1],data[2]])
+                train_data = np.array([data[0], data[1], data[2]])
+                answer = np.array([data[3],data[4]])
 
                 # learn
                 self.Train(train_data, answer, i)
